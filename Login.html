@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.7.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.7.0/firebase-analytics.js";
+        import {getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/9.7.0/firebase-auth.js"
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyB35mRgXZ0fGridW_fkklelTp6XrMUwRuI",
+          authDomain: "helloworldb0t.firebaseapp.com",
+          projectId: "helloworldb0t",
+          storageBucket: "helloworldb0t.appspot.com",
+          messagingSenderId: "942046296715",
+          appId: "1:942046296715:web:a3534e9adc93f50952b28e",
+          measurementId: "G-8JZV2LVV5S"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth();
+
+
+        //FUNCAO REGISTRO
+        window.criar_usuario = function(){
+            let email = window.document.getElementById("mail").value;
+            let password = window.document.getElementById("pass").value;
+            console.log(email);
+            console.log(password);
+            
+            createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            // ...
+            console.log("Usuario criado");
+            })
+            .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            // ..
+            console.log(errorMessage);
+            });
+        };
+
+        window.logar_usuario = function (){
+            let email = window.document.getElementById("mail").value;
+            let password = window.document.getElementById("pass").value;
+            console.log(email);
+            console.log(password);
+
+            signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Signed in
+                const user = userCredential.user;
+                // ...
+            console.log("Usuário logado!");
+            console.log(user);
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
+            });
+        }
+      </script>
+</head>
+<body>  
+        <label for="mail">Email</label>
+        <input type="email" id="mail">
+        <label for="pass">Senha</label>
+        <input type="password" id="pass">
+        <button type="button" onclick="window.criar_usuario();">Criar Usuário</button>
+        <button type="button" onclick="window.logar_usuario();">Logar Usuário</button>
+    </form>
+</body>
+</html>
