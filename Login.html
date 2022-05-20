@@ -9,7 +9,8 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.7.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.7.0/firebase-analytics.js";
-        import {getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/9.7.0/firebase-auth.js"
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut  } from "https://www.gstatic.com/firebasejs/9.7.0/firebase-auth.js"
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.7.0/firebase-firestore.js";
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
       
@@ -29,43 +30,46 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const auth = getAuth();
+        const db = getFirestore(app);
 
-
+        
+        
         //FUNCAO REGISTRO
         window.criar_usuario = function(){
             let email = window.document.getElementById("mail").value;
             let password = window.document.getElementById("pass").value;
-            console.log(email);
-            console.log(password);
             
             createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            // ...
-            console.log("Usuario criado");
+                // Signed in
+                const user = userCredential.user;
+                // ...
+                alert("Cadastro e Login efetuado com Sucesso!")
+                console.log("registro criado");
             })
             .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            // ..
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                // ..
             console.log(errorMessage);
             });
         };
 
+        //FUNCAO LOGIN
         window.logar_usuario = function (){
             let email = window.document.getElementById("mail").value;
             let password = window.document.getElementById("pass").value;
             console.log(email);
             console.log(password);
-
+            
             signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 // Signed in
                 const user = userCredential.user;
                 // ...
-            console.log("Usuário logado!");
-            console.log(user);
+                alert("Login efetuado com Sucesso!")
+                console.log("login logado!");
+                console.log(user.uid);
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -73,15 +77,84 @@
                 console.log(errorMessage);
             });
         }
-      </script>
+
+        //FUNCAO PARA SALVAR PEDIDO
+        window.salvar_pedido = async function(){
+
+            const user = auth.currentUser;
+            if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+                let order = window.document.getElementById("order").value;
+                let adress = window.document.getElementById("adress").value;
+                let datetime = window.document.getElementById("datetime").value;
+                // Add a new document in collection "pedidos"
+                await setDoc(doc(db, "pedidos", order ), {
+                endereço: adress,
+                data: datetime,
+                usuario: user.uid,
+                email: user.email
+                }).then((
+                    alert("Pedido Efetuado com sucesso! Obrigado pela compra!")
+                )).catch((error) => {
+                    const errorMessage = error.message;
+                    console.log(errorMessage);
+                });
+            } else {
+            // No user is signed in.
+                alert("Efetue o Login para efetuar o pedido, caso não tenha um, efetue o cadastro.")
+                return;
+            }
+
+        }
+
+        window.deslogar_usuario = function(){
+            signOut(auth).then(() => {
+            alert("Deslogado com Sucesso.")
+            }).catch((error) => {
+            alert("Ocorreu um problema ao deslogar, tente novamente.")
+            console.log(error);
+            });
+        };
+    </script>
 </head>
-<body>  
-        <label for="mail">Email</label>
-        <input type="email" id="mail">
-        <label for="pass">Senha</label>
-        <input type="password" id="pass">
-        <button type="button" onclick="window.criar_usuario();">Criar Usuário</button>
-        <button type="button" onclick="window.logar_usuario();">Logar Usuário</button>
+<body style="font-family: Arial, Helvetica, sans-serif;">  
+        <nav style="border: 2px solid black; width: 850px; margin: auto; padding: 5px;">
+            <label for="mail">Email</label>
+            <input type="email" id="mail">
+            <label for="pass">Senha</label>
+            <input type="password" id="pass" style="margin-right: 20px;">
+            <button type="button" onclick="window.criar_usuario();" style="margin-right: 20px;">Criar Usuário</button>
+            <button type="button" onclick="window.logar_usuario();" style="margin-right: 20px;">Logar Usuário</button>
+            <button type="button" onclick="window.deslogar_usuario();">Deslogar Usuário</button>
+        </nav>
+
+        <br>
+        <br>
+
+        <div style="border: 2px solid black; margin: auto; text-align: center; width: 400px; padding: 20px;">
+            <h1>Encomenda de Bolos</h1>
+            <h2>Valor: R$ 20,00</h2>
+            <label for="order">Sabor do Bolo</label>
+            <select id="order">
+                <option value="Bolo-Laranja">Bolo de Laranja</option>
+                <option value="Bolo-Chocolate">Bolo de Chocolate</option>
+                <option value="Bolo-Cenoura">Bolo de Cenoura</option>
+                <option value="Bolo-Milho">Bolo de Milho</option>
+                <option value="Bolo-Banana">Bolo de Banana</option>
+            </select>
+            <br>
+            <br>
+            <label for="adress">Seu endereço</label>
+            <input type="text" id="adress">
+            <br>
+            <br>
+            <label for="datetime">Horário e Dia da Entrega</label>
+            <input type="datetime-local" id="datetime">
+            <br>
+            <br>
+            <button type="button" onclick="window.salvar_pedido();">Salvar Pedido</button>
+        </div>
     </form>
 </body>
 </html>
